@@ -4140,12 +4140,13 @@ PCONTEXT Thread::GetAbortContext ()
 //****************************************************************************
 bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
 {
-    CONTRACTL {
+  CONTRACTL {
         NOTHROW;
         GC_NOTRIGGER;
     }
     CONTRACTL_END;
 
+    printf("in SysStartSuspendForDebug");
     Thread  *pCurThread = GetThreadNULLOk();
     Thread  *thread = NULL;
 
@@ -4179,6 +4180,7 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
 
     while ((thread = ThreadStore::GetThreadList(thread)) != NULL)
     {
+            printf("Thread in preparation\n");
 #if 0
 //<REVISIT_TODO>  @todo APPD This needs to be finished, replaced, or yanked --MiPanitz</REVISIT_TODO>
         if (m_DebugAppDomainTarget != NULL &&
@@ -4194,6 +4196,7 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
 
         if (thread == pCurThread)
         {
+            printf("Is current thread");
             LOG((LF_CORDB, LL_INFO1000,
                  "[0x%x] SUSPEND: marking current thread.\n",
                  thread->GetThreadId()));
@@ -4207,6 +4210,7 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
             continue;
         }
 
+        printf("Is not a current thread\n");
         thread->SetupForSuspension(TS_DebugSuspendPending);
 
         // Threads can be in Preemptive or Cooperative GC mode.
@@ -4216,13 +4220,15 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
         // can get their Pending bit set.
 
 #if !defined(DISABLE_THREADSUSPEND) && defined(FEATURE_HIJACK) && !defined(TARGET_UNIX)
-        DWORD dwSwitchCount = 0;
+            DWORD dwSwitchCount = 0;
+            printf("set dwSwitchCount = 0\n");
     RetrySuspension:
 #endif // !DISABLE_THREADSUSPEND && FEATURE_HIJACK && !TARGET_UNIX
 
         SuspendThreadResult str = STR_Success;
         if (!UseContextBasedThreadRedirection())
         {
+            printf("UseContextBasedThreadRedirection\n");
             // On platforms that do not support safe thread suspension we either
             // rely on the GCPOLL mechanism mechanism enabled by TrapReturningThreads,
             // or we try to hijack/redirect the thread using a thread activation.
@@ -4240,6 +4246,8 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
             // Otherwise, we may deadlock if suspended thread holds allocator locks.
             ThreadStore::AllocateOSContext();
             str = thread->SuspendThread();
+            printf("Use thread->SuspendThread();\n");
+
 #endif // !DISABLE_THREADSUSPEND
         }
 
@@ -4248,9 +4256,11 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
 #if !defined(DISABLE_THREADSUSPEND) && defined(FEATURE_HIJACK) && !defined(TARGET_UNIX)
             if (UseContextBasedThreadRedirection())
             {
+                printf("m_fPreemptiveGCDisabled == true, used UseContextBasedThreadRedirection\n");
                 WorkingOnThreadContextHolder workingOnThreadContext(thread);
                 if (workingOnThreadContext.Acquired() && thread->HandledJITCase())
                 {
+                    printf("workingOnThreadContext.Acquired() && thread->HandledJITCase() is true\n");
                     // Redirect thread so we can capture a good thread context
                     // (GetThreadContext is not sufficient, due to an OS bug).
                     // If we don't succeed (should only happen on Win9X, due to
@@ -4276,6 +4286,7 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
                                        TS_DebugWillSync
                       );
 
+            printf("markedForSuspension\n");
             if (!UseContextBasedThreadRedirection())
             {
                 // There'a a race above between the moment we first check m_fPreemptiveGCDisabled
@@ -4289,6 +4300,7 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
                 // after it leaves the forbid region.
 
 #if defined(FEATURE_THREAD_ACTIVATION) && defined(TARGET_WINDOWS)
+                printf("before thread->InjectActivation(Thread::ActivationReason::SuspendForDebugger);\n");
                 // Inject an activation that will interrupt the thread and try to bring it to a safe point
                 thread->InjectActivation(Thread::ActivationReason::SuspendForDebugger);
 #endif // FEATURE_THREAD_ACTIVATION && TARGET_WINDOWS
@@ -4298,6 +4310,7 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
 #ifndef DISABLE_THREADSUSPEND
                 // Resume the thread and let it run to a safe point
                 thread->ResumeThread();
+                printf("DISABLE_THREADSUSPEND is true. ResumeThread is set\n");
 #endif // !DISABLE_THREADSUSPEND
             }
 
@@ -4310,6 +4323,7 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
             // Mark threads that are outside the Runtime so that if
             // they attempt to re-enter they will trip.
             thread->MarkForSuspension(TS_DebugSuspendPending);
+            printf("!thread->m_fPreemptiveGCDisabled is true, thread is marked for suspension\n");
 
             if (
                 // There'a a race above between the moment we first check m_fPreemptiveGCDisabled
@@ -4329,6 +4343,7 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
                 // Remember that this thread will be running to a safe point
                 InterlockedIncrement(&m_DebugWillSyncCount);
                 thread->SetThreadState(TS_DebugWillSync);
+                printf("thread->SetThreadState(TS_DebugWillSync) is called\n");
             }
 
 #ifndef DISABLE_THREADSUSPEND
@@ -4350,12 +4365,16 @@ bool Thread::SysStartSuspendForDebug(AppDomain *pAppDomain)
 
     if (InterlockedDecrement(&m_DebugWillSyncCount) < 0)
     {
+        printf("TRUE: InterlockedDecrement(&m_DebugWillSyncCount) < 0\n");
         LOG((LF_CORDB, LL_INFO1000,
              "SUSPEND: all threads sync before return.\n"));
         return true;
     }
     else
+    {
+        printf("FALSE : InterlockedDecrement(&m_DebugWillSyncCount) < 0");
         return false;
+    }
 }
 
 //

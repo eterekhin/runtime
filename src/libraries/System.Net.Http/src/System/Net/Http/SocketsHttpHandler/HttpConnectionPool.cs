@@ -477,13 +477,6 @@ namespace System.Net.Http
                 return;
             }
 
-            if (NetEventSource.Log.IsEnabled())
-            {
-                Trace($"Available HTTP/1.1 connections: {_availableHttp11Connections.Count}, Requests in the queue: {_http11RequestQueue.Count}, " +
-                    $"Pending HTTP/1.1 connections: {_pendingHttp11ConnectionCount}, Total associated HTTP/1.1 connections: {_associatedHttp11ConnectionCount}, " +
-                    $"Max HTTP/1.1 connection limit: {_maxHttp11Connections}.");
-            }
-
             // Determine if we can and should add a new connection to the pool.
             if (_availableHttp11Connections.Count == 0 &&                           // No available connections
                 _http11RequestQueue.Count > _pendingHttp11ConnectionCount &&        // More requests queued than pending connections
@@ -872,10 +865,8 @@ namespace System.Net.Http
                 {
                     quicConnection = await ConnectHelper.ConnectQuicAsync(request, Settings._quicImplementationProvider ?? QuicImplementationProviders.Default, new DnsEndPoint(authority.IdnHost, authority.Port), _sslOptionsHttp3!, cancellationToken).ConfigureAwait(false);
                 }
-                catch (Exception e)
+                catch
                 {
-                    if (NetEventSource.Log.IsEnabled()) Trace($"QUIC connection failed: {e}");
-
                     // Disables HTTP/3 until server announces it can handle it via Alt-Svc.
                     BlocklistAuthority(authority);
                     throw;
@@ -1612,7 +1603,7 @@ namespace System.Net.Http
 
         private void HandleHttp11ConnectionFailure(HttpRequestMessage request, Exception e)
         {
-            if (NetEventSource.Log.IsEnabled()) Trace($"HTTP/1.1 connection failed: {e}");
+            if (NetEventSource.Log.IsEnabled()) Trace("HTTP/1.1 connection failed");
 
             bool failRequest;
             TaskCompletionSourceWithCancellation<HttpConnection>? waiter;
@@ -1642,7 +1633,7 @@ namespace System.Net.Http
 
         private void HandleHttp2ConnectionFailure(HttpRequestMessage request, Exception e)
         {
-            if (NetEventSource.Log.IsEnabled()) Trace($"HTTP2 connection failed: {e}");
+            if (NetEventSource.Log.IsEnabled()) Trace("HTTP2 connection failed");
 
             bool failRequest;
             TaskCompletionSourceWithCancellation<Http2Connection?>? waiter;

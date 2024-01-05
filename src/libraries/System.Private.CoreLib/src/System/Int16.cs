@@ -28,21 +28,6 @@ namespace System
         public const short MaxValue = (short)0x7FFF;
         public const short MinValue = unchecked((short)0x8000);
 
-        /// <summary>Represents the additive identity (0).</summary>
-        public const short AdditiveIdentity = 0;
-
-        /// <summary>Represents the multiplicative identity (1).</summary>
-        public const short MultiplicativeIdentity = 1;
-
-        /// <summary>Represents the number one (1).</summary>
-        public const short One = 1;
-
-        /// <summary>Represents the number zero (0).</summary>
-        public const short Zero = 0;
-
-        /// <summary>Represents the number negative one (-1).</summary>
-        public const short NegativeOne = -1;
-
         // Compares this object to another object, returning an integer that
         // indicates the relationship.
         // Returns a value less than zero if this  object
@@ -303,47 +288,45 @@ namespace System
         // IAdditionOperators
         //
 
-        /// <inheritdoc cref="IAdditionOperators{TSelf, TOther, TResult}.op_Addition(TSelf, TOther)" />
-        static short IAdditionOperators<short, short, short>.operator +(short left, short right) => (short)(left + right);
+        static short IAdditionOperators<short, short, short>.operator +(short left, short right)
+            => (short)(left + right);
 
-        // /// <inheritdoc cref="IAdditionOperators{TSelf, TOther, TResult}.op_Addition(TSelf, TOther)" />
-        // static short IAdditionOperators<short, short, short>.operator checked +(short left, short right) => checked((short)(left + right));
+        // static checked short IAdditionOperators<short, short, short>.operator +(short left, short right)
+        //     => checked((short)(left + right));
 
         //
         // IAdditiveIdentity
         //
 
-        /// <inheritdoc cref="IAdditiveIdentity{TSelf, TResult}.AdditiveIdentity" />
-        static short IAdditiveIdentity<short, short>.AdditiveIdentity => AdditiveIdentity;
+        static short IAdditiveIdentity<short, short>.AdditiveIdentity => 0;
 
         //
         // IBinaryInteger
         //
 
-        /// <inheritdoc cref="IBinaryInteger{TSelf}.LeadingZeroCount(TSelf)" />
-        public static short LeadingZeroCount(short value) => (short)(BitOperations.LeadingZeroCount((ushort)value) - 16);
+        static short IBinaryInteger<short>.LeadingZeroCount(short value)
+            => (short)(BitOperations.LeadingZeroCount((ushort)value) - 16);
 
-        /// <inheritdoc cref="IBinaryInteger{TSelf}.PopCount(TSelf)" />
-        public static short PopCount(short value) => (short)BitOperations.PopCount((ushort)value);
+        static short IBinaryInteger<short>.PopCount(short value)
+            => (short)BitOperations.PopCount((ushort)value);
 
-        /// <inheritdoc cref="IBinaryInteger{TSelf}.RotateLeft(TSelf, int)" />
-        public static short RotateLeft(short value, int rotateAmount) => (short)((value << (rotateAmount & 15)) | ((ushort)value >> ((16 - rotateAmount) & 15)));
+        static short IBinaryInteger<short>.RotateLeft(short value, int rotateAmount)
+            => (short)((value << (rotateAmount & 15)) | ((ushort)value >> ((16 - rotateAmount) & 15)));
 
-        /// <inheritdoc cref="IBinaryInteger{TSelf}.RotateRight(TSelf, int)" />
-        public static short RotateRight(short value, int rotateAmount) => (short)(((ushort)value >> (rotateAmount & 15)) | (value << ((16 - rotateAmount) & 15)));
+        static short IBinaryInteger<short>.RotateRight(short value, int rotateAmount)
+            => (short)(((ushort)value >> (rotateAmount & 15)) | (value << ((16 - rotateAmount) & 15)));
 
-        /// <inheritdoc cref="IBinaryInteger{TSelf}.TrailingZeroCount(TSelf)" />
-        public static short TrailingZeroCount(short value) => (byte)(BitOperations.TrailingZeroCount(value << 16) - 16);
+        static short IBinaryInteger<short>.TrailingZeroCount(short value)
+            => (byte)(BitOperations.TrailingZeroCount(value << 16) - 16);
 
         //
         // IBinaryNumber
         //
 
-        /// <inheritdoc cref="IBinaryNumber{TSelf}.IsPow2(TSelf)" />
-        public static bool IsPow2(short value) => BitOperations.IsPow2(value);
+        static bool IBinaryNumber<short>.IsPow2(short value)
+            => BitOperations.IsPow2(value);
 
-        /// <inheritdoc cref="IBinaryNumber{TSelf}.Log2(TSelf)" />
-        public static short Log2(short value)
+        static short IBinaryNumber<short>.Log2(short value)
         {
             if (value < 0)
             {
@@ -356,128 +339,124 @@ namespace System
         // IBitwiseOperators
         //
 
-        /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_BitwiseAnd(TSelf, TOther)" />
-        static short IBitwiseOperators<short, short, short>.operator &(short left, short right) => (short)(left & right);
+        static short IBitwiseOperators<short, short, short>.operator &(short left, short right)
+            => (short)(left & right);
 
-        /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_BitwiseOr(TSelf, TOther)" />
-        static short IBitwiseOperators<short, short, short>.operator |(short left, short right) => (short)(left | right);
+        static short IBitwiseOperators<short, short, short>.operator |(short left, short right)
+            => (short)(left | right);
 
-        /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_ExclusiveOr(TSelf, TOther)" />
-        static short IBitwiseOperators<short, short, short>.operator ^(short left, short right) => (short)(left ^ right);
+        static short IBitwiseOperators<short, short, short>.operator ^(short left, short right)
+            => (short)(left ^ right);
 
-        /// <inheritdoc cref="IBitwiseOperators{TSelf, TOther, TResult}.op_OnesComplement(TSelf)" />
-        static short IBitwiseOperators<short, short, short>.operator ~(short value) => (short)(~value);
+        static short IBitwiseOperators<short, short, short>.operator ~(short value)
+            => (short)(~value);
 
         //
         // IComparisonOperators
         //
 
-        /// <inheritdoc cref="IComparisonOperators{TSelf, TOther}.op_LessThan(TSelf, TOther)" />
-        static bool IComparisonOperators<short, short>.operator <(short left, short right) => left < right;
+        static bool IComparisonOperators<short, short>.operator <(short left, short right)
+            => left < right;
 
-        /// <inheritdoc cref="IComparisonOperators{TSelf, TOther}.op_LessThanOrEqual(TSelf, TOther)" />
-        static bool IComparisonOperators<short, short>.operator <=(short left, short right) => left <= right;
+        static bool IComparisonOperators<short, short>.operator <=(short left, short right)
+            => left <= right;
 
-        /// <inheritdoc cref="IComparisonOperators{TSelf, TOther}.op_GreaterThan(TSelf, TOther)" />
-        static bool IComparisonOperators<short, short>.operator >(short left, short right) => left > right;
+        static bool IComparisonOperators<short, short>.operator >(short left, short right)
+            => left > right;
 
-        /// <inheritdoc cref="IComparisonOperators{TSelf, TOther}.op_GreaterThanOrEqual(TSelf, TOther)" />
-        static bool IComparisonOperators<short, short>.operator >=(short left, short right) => left >= right;
+        static bool IComparisonOperators<short, short>.operator >=(short left, short right)
+            => left >= right;
 
         //
         // IDecrementOperators
         //
 
-        /// <inheritdoc cref="IDecrementOperators{TSelf}.op_Decrement(TSelf)" />
-        static short IDecrementOperators<short>.operator --(short value) => --value;
+        static short IDecrementOperators<short>.operator --(short value)
+            => --value;
 
-        // /// <inheritdoc cref="IDecrementOperators{TSelf}.op_Decrement(TSelf)" />
-        // static short IDecrementOperators<short>.operator checked --(short value) => checked(--value);
+        // static checked short IDecrementOperators<short>.operator --(short value)
+        //     => checked(--value);
 
         //
         // IDivisionOperators
         //
 
-        /// <inheritdoc cref="IDivisionOperators{TSelf, TOther, TResult}.op_Division(TSelf, TOther)" />
-        static short IDivisionOperators<short, short, short>.operator /(short left, short right) => (short)(left / right);
+        static short IDivisionOperators<short, short, short>.operator /(short left, short right)
+            => (short)(left / right);
 
-        // /// <inheritdoc cref="IDivisionOperators{TSelf, TOther, TResult}.op_CheckedDivision(TSelf, TOther)" />
-        // static short IDivisionOperators<short, short, short>.operator checked /(short left, short right) => checked((short)(left / right));
+        // static checked short IDivisionOperators<short, short, short>.operator /(short left, short right)
+        //     => checked((short)(left / right));
 
         //
         // IEqualityOperators
         //
 
-        /// <inheritdoc cref="IEqualityOperators{TSelf, TOther}.op_Equality(TSelf, TOther)" />
-        static bool IEqualityOperators<short, short>.operator ==(short left, short right) => left == right;
+        static bool IEqualityOperators<short, short>.operator ==(short left, short right)
+            => left == right;
 
-        /// <inheritdoc cref="IEqualityOperators{TSelf, TOther}.op_Inequality(TSelf, TOther)" />
-        static bool IEqualityOperators<short, short>.operator !=(short left, short right) => left != right;
+        static bool IEqualityOperators<short, short>.operator !=(short left, short right)
+            => left != right;
 
         //
         // IIncrementOperators
         //
 
-        /// <inheritdoc cref="IIncrementOperators{TSelf}.op_Increment(TSelf)" />
-        static short IIncrementOperators<short>.operator ++(short value) => ++value;
+        static short IIncrementOperators<short>.operator ++(short value)
+            => ++value;
 
-        // /// <inheritdoc cref="IIncrementOperators{TSelf}.op_CheckedIncrement(TSelf)" />
-        // static short IIncrementOperators<short>.operator checked ++(short value) => checked(++value);
+        // static checked short IIncrementOperators<short>.operator ++(short value)
+        //     => checked(++value);
 
         //
         // IMinMaxValue
         //
 
-        /// <inheritdoc cref="IMinMaxValue{TSelf}.MinValue" />
         static short IMinMaxValue<short>.MinValue => MinValue;
 
-        /// <inheritdoc cref="IMinMaxValue{TSelf}.MaxValue" />
         static short IMinMaxValue<short>.MaxValue => MaxValue;
 
         //
         // IModulusOperators
         //
 
-        /// <inheritdoc cref="IModulusOperators{TSelf, TOther, TResult}.op_Modulus(TSelf, TOther)" />
-        static short IModulusOperators<short, short, short>.operator %(short left, short right) => (short)(left % right);
+        static short IModulusOperators<short, short, short>.operator %(short left, short right)
+            => (short)(left % right);
+
+        // static checked short IModulusOperators<short, short, short>.operator %(short left, short right)
+        //     => checked((short)(left % right));
 
         //
         // IMultiplicativeIdentity
         //
 
-        /// <inheritdoc cref="IMultiplicativeIdentity{TSelf, TResult}.MultiplicativeIdentity" />
-        static short IMultiplicativeIdentity<short, short>.MultiplicativeIdentity => MultiplicativeIdentity;
+        static short IMultiplicativeIdentity<short, short>.MultiplicativeIdentity => 1;
 
         //
         // IMultiplyOperators
         //
 
-        /// <inheritdoc cref="IMultiplyOperators{TSelf, TOther, TResult}.op_Multiply(TSelf, TOther)" />
-        static short IMultiplyOperators<short, short, short>.operator *(short left, short right) => (short)(left * right);
+        static short IMultiplyOperators<short, short, short>.operator *(short left, short right)
+            => (short)(left * right);
 
-        // /// <inheritdoc cref="IMultiplyOperators{TSelf, TOther, TResult}.op_CheckedMultiply(TSelf, TOther)" />
-        // static short IMultiplyOperators<short, short, short>.operator checked *(short left, short right) => checked((short)(left * right));
+        // static checked short IMultiplyOperators<short, short, short>.operator *(short left, short right)
+        //     => checked((short)(left * right));
 
         //
         // INumber
         //
 
-        /// <inheritdoc cref="INumber{TSelf}.One" />
-        static short INumber<short>.One => One;
+        static short INumber<short>.One => 1;
 
-        /// <inheritdoc cref="INumber{TSelf}.Zero" />
-        static short INumber<short>.Zero => Zero;
+        static short INumber<short>.Zero => 0;
 
-        /// <inheritdoc cref="INumber{TSelf}.Abs(TSelf)" />
-        public static short Abs(short value) => Math.Abs(value);
+        static short INumber<short>.Abs(short value)
+            => Math.Abs(value);
 
-        /// <inheritdoc cref="INumber{TSelf}.Clamp(TSelf, TSelf, TSelf)" />
-        public static short Clamp(short value, short min, short max) => Math.Clamp(value, min, max);
+        static short INumber<short>.Clamp(short value, short min, short max)
+            => Math.Clamp(value, min, max);
 
-        /// <inheritdoc cref="INumber{TSelf}.Create{TOther}(TOther)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short Create<TOther>(TOther value)
-            where TOther : INumber<TOther>
+        static short INumber<short>.Create<TOther>(TOther value)
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -542,10 +521,8 @@ namespace System
             }
         }
 
-        /// <inheritdoc cref="INumber{TSelf}.CreateSaturating{TOther}(TOther)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short CreateSaturating<TOther>(TOther value)
-            where TOther : INumber<TOther>
+        static short INumber<short>.CreateSaturating<TOther>(TOther value)
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -627,10 +604,8 @@ namespace System
             }
         }
 
-        /// <inheritdoc cref="INumber{TSelf}.CreateTruncating{TOther}(TOther)" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static short CreateTruncating<TOther>(TOther value)
-            where TOther : INumber<TOther>
+        static short INumber<short>.CreateTruncating<TOther>(TOther value)
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -695,22 +670,26 @@ namespace System
             }
         }
 
-        /// <inheritdoc cref="INumber{TSelf}.DivRem(TSelf, TSelf)" />
-        public static (short Quotient, short Remainder) DivRem(short left, short right) => Math.DivRem(left, right);
+        static (short Quotient, short Remainder) INumber<short>.DivRem(short left, short right)
+            => Math.DivRem(left, right);
 
-        /// <inheritdoc cref="INumber{TSelf}.Max(TSelf, TSelf)" />
-        public static short Max(short x, short y) => Math.Max(x, y);
+        static short INumber<short>.Max(short x, short y)
+            => Math.Max(x, y);
 
-        /// <inheritdoc cref="INumber{TSelf}.Min(TSelf, TSelf)" />
-        public static short Min(short x, short y) => Math.Min(x, y);
+        static short INumber<short>.Min(short x, short y)
+            => Math.Min(x, y);
 
-        /// <inheritdoc cref="INumber{TSelf}.Sign(TSelf)" />
-        public static short Sign(short value) => (short)Math.Sign(value);
+        static short INumber<short>.Parse(string s, NumberStyles style, IFormatProvider? provider)
+            => Parse(s, style, provider);
 
-        /// <inheritdoc cref="INumber{TSelf}.TryCreate{TOther}(TOther, out TSelf)" />
+        static short INumber<short>.Parse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider)
+            => Parse(s, style, provider);
+
+        static short INumber<short>.Sign(short value)
+            => (short)Math.Sign(value);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryCreate<TOther>(TOther value, out short result)
-            where TOther : INumber<TOther>
+        static bool INumber<short>.TryCreate<TOther>(TOther value, out short result)
         {
             if (typeof(TOther) == typeof(byte))
             {
@@ -878,70 +857,79 @@ namespace System
             }
         }
 
+        static bool INumber<short>.TryParse([NotNullWhen(true)] string? s, NumberStyles style, IFormatProvider? provider, out short result)
+            => TryParse(s, style, provider, out result);
+
+        static bool INumber<short>.TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider? provider, out short result)
+            => TryParse(s, style, provider, out result);
+
         //
         // IParseable
         //
 
-        public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out short result) => TryParse(s, NumberStyles.Integer, provider, out result);
+        static short IParseable<short>.Parse(string s, IFormatProvider? provider)
+            => Parse(s, provider);
+
+        static bool IParseable<short>.TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out short result)
+            => TryParse(s, NumberStyles.Integer, provider, out result);
 
         //
         // IShiftOperators
         //
 
-        /// <inheritdoc cref="IShiftOperators{TSelf, TResult}.op_LeftShift(TSelf, int)" />
-        static short IShiftOperators<short, short>.operator <<(short value, int shiftAmount) => (short)(value << shiftAmount);
+        static short IShiftOperators<short, short>.operator <<(short value, int shiftAmount)
+            => (short)(value << shiftAmount);
 
-        /// <inheritdoc cref="IShiftOperators{TSelf, TResult}.op_RightShift(TSelf, int)" />
-        static short IShiftOperators<short, short>.operator >>(short value, int shiftAmount) => (short)(value >> shiftAmount);
+        static short IShiftOperators<short, short>.operator >>(short value, int shiftAmount)
+            => (short)(value >> shiftAmount);
 
-        // /// <inheritdoc cref="IShiftOperators{TSelf, TResult}.op_UnsignedRightShift(TSelf, int)" />
-        // static short IShiftOperators<short, short>.operator >>>(short value, int shiftAmount) => (short)((ushort)value >> shiftAmount);
+        // static short IShiftOperators<short, short>.operator >>>(short value, int shiftAmount)
+        //     => (short)((ushort)value >> shiftAmount);
 
         //
         // ISignedNumber
         //
 
-        /// <inheritdoc cref="ISignedNumber{TSelf}.NegativeOne" />
-        static short ISignedNumber<short>.NegativeOne => NegativeOne;
+        static short ISignedNumber<short>.NegativeOne => -1;
 
         //
         // ISpanParseable
         //
 
-        /// <inheritdoc cref="ISpanParseable{TSelf}.Parse(ReadOnlySpan{char}, IFormatProvider?)" />
-        public static short Parse(ReadOnlySpan<char> s, IFormatProvider? provider) => Parse(s, NumberStyles.Integer, provider);
+        static short ISpanParseable<short>.Parse(ReadOnlySpan<char> s, IFormatProvider? provider)
+            => Parse(s, NumberStyles.Integer, provider);
 
-        /// <inheritdoc cref="ISpanParseable{TSelf}.TryParse(ReadOnlySpan{char}, IFormatProvider?, out TSelf)" />
-        public static bool TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out short result) => TryParse(s, NumberStyles.Integer, provider, out result);
+        static bool ISpanParseable<short>.TryParse(ReadOnlySpan<char> s, IFormatProvider? provider, out short result)
+            => TryParse(s, NumberStyles.Integer, provider, out result);
 
         //
         // ISubtractionOperators
         //
 
-        /// <inheritdoc cref="ISubtractionOperators{TSelf, TOther, TResult}.op_Subtraction(TSelf, TOther)" />
-        static short ISubtractionOperators<short, short, short>.operator -(short left, short right) => (short)(left - right);
+        static short ISubtractionOperators<short, short, short>.operator -(short left, short right)
+            => (short)(left - right);
 
-        // /// <inheritdoc cref="ISubtractionOperators{TSelf, TOther, TResult}.op_CheckedSubtraction(TSelf, TOther)" />
-        // static short ISubtractionOperators<short, short, short>.operator checked -(short left, short right) => checked((short)(left - right));
+        // static checked short ISubtractionOperators<short, short, short>.operator -(short left, short right)
+        //     => checked((short)(left - right));
 
         //
         // IUnaryNegationOperators
         //
 
-        /// <inheritdoc cref="IUnaryNegationOperators{TSelf, TResult}.op_UnaryNegation(TSelf)" />
-        static short IUnaryNegationOperators<short, short>.operator -(short value) => (short)(-value);
+        static short IUnaryNegationOperators<short, short>.operator -(short value)
+            => (short)(-value);
 
-        // /// <inheritdoc cref="IUnaryNegationOperators{TSelf, TResult}.op_CheckedUnaryNegation(TSelf)" />
-        // static short IUnaryNegationOperators<short, short>.operator checked -(short value) => checked((short)(-value));
+        // static checked short IUnaryNegationOperators<short, short>.operator -(short value)
+        //     => checked((short)(-value));
 
         //
         // IUnaryPlusOperators
         //
 
-        /// <inheritdoc cref="IUnaryPlusOperators{TSelf, TResult}.op_UnaryPlus(TSelf)" />
-        static short IUnaryPlusOperators<short, short>.operator +(short value) => (short)(+value);
+        static short IUnaryPlusOperators<short, short>.operator +(short value)
+            => (short)(+value);
 
-        // /// <inheritdoc cref="IUnaryPlusOperators{TSelf, TResult}.op_CheckedUnaryPlus(TSelf)" />
-        // static short IUnaryPlusOperators<short, short>.operator checked +(short value) => checked((short)(+value));
+        // static checked short IUnaryPlusOperators<short, short>.operator +(short value)
+        //     => checked((short)(+value));
     }
 }

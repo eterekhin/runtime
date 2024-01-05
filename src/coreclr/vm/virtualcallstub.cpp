@@ -693,7 +693,7 @@ void VirtualCallStubManager::Init(BaseDomain *pDomain, LoaderAllocator *pLoaderA
     NewHolder<LoaderHeap> indcell_heap_holder(
                                new LoaderHeap(indcell_heap_reserve_size, indcell_heap_commit_size,
                                               initReservedMem, indcell_heap_reserve_size,
-                                              NULL, UnlockedLoaderHeap::HeapKind::Data));
+                                              NULL, FALSE));
 
     initReservedMem += indcell_heap_reserve_size;
 
@@ -701,7 +701,7 @@ void VirtualCallStubManager::Init(BaseDomain *pDomain, LoaderAllocator *pLoaderA
     NewHolder<LoaderHeap> cache_entry_heap_holder(
                                new LoaderHeap(cache_entry_heap_reserve_size, cache_entry_heap_commit_size,
                                               initReservedMem, cache_entry_heap_reserve_size,
-                                              &cache_entry_rangeList, UnlockedLoaderHeap::HeapKind::Data));
+                                              &cache_entry_rangeList, FALSE));
 
     initReservedMem += cache_entry_heap_reserve_size;
 
@@ -709,7 +709,7 @@ void VirtualCallStubManager::Init(BaseDomain *pDomain, LoaderAllocator *pLoaderA
     NewHolder<LoaderHeap> lookup_heap_holder(
                                new LoaderHeap(lookup_heap_reserve_size, lookup_heap_commit_size,
                                               initReservedMem, lookup_heap_reserve_size,
-                                              &lookup_rangeList, UnlockedLoaderHeap::HeapKind::Executable));
+                                              &lookup_rangeList, TRUE));
 
     initReservedMem += lookup_heap_reserve_size;
 
@@ -717,7 +717,7 @@ void VirtualCallStubManager::Init(BaseDomain *pDomain, LoaderAllocator *pLoaderA
     NewHolder<LoaderHeap> dispatch_heap_holder(
                                new LoaderHeap(dispatch_heap_reserve_size, dispatch_heap_commit_size,
                                               initReservedMem, dispatch_heap_reserve_size,
-                                              &dispatch_rangeList, UnlockedLoaderHeap::HeapKind::Executable));
+                                              &dispatch_rangeList, TRUE));
 
     initReservedMem += dispatch_heap_reserve_size;
 
@@ -725,7 +725,7 @@ void VirtualCallStubManager::Init(BaseDomain *pDomain, LoaderAllocator *pLoaderA
     NewHolder<LoaderHeap> resolve_heap_holder(
                                new LoaderHeap(resolve_heap_reserve_size, resolve_heap_commit_size,
                                               initReservedMem, resolve_heap_reserve_size,
-                                              &resolve_rangeList, UnlockedLoaderHeap::HeapKind::Executable));
+                                              &resolve_rangeList, TRUE));
 
     initReservedMem += resolve_heap_reserve_size;
 
@@ -733,7 +733,7 @@ void VirtualCallStubManager::Init(BaseDomain *pDomain, LoaderAllocator *pLoaderA
     NewHolder<LoaderHeap> vtable_heap_holder(
                                new LoaderHeap(vtable_heap_reserve_size, vtable_heap_commit_size,
                                               initReservedMem, vtable_heap_reserve_size,
-                                              &vtable_rangeList, UnlockedLoaderHeap::HeapKind::Executable));
+                                              &vtable_rangeList, TRUE));
 
     initReservedMem += vtable_heap_reserve_size;
 

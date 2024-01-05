@@ -191,15 +191,6 @@ class UnlockedLoaderHeap
     friend class ClrDataAccess;
 #endif
 
-public:
-
-    enum class HeapKind
-    {
-        Data,
-        Executable,
-        Interleaved
-    };
-
 private:
     // Linked list of ClrVirtualAlloc'd pages
     PTR_LoaderHeapBlock m_pFirstBlock;
@@ -217,16 +208,12 @@ private:
     // When we need to commit pages from our reserved list, number of bytes to commit at a time
     DWORD               m_dwCommitBlockSize;
 
-    // For interleaved heap (RX pages interleaved with RW ones), this specifies the allocation granularity,
-    // which is the individual code block size
-    DWORD               m_dwGranularity;
-
     // Range list to record memory ranges in
     RangeList *         m_pRangeList;
 
     size_t              m_dwTotalAlloc;
 
-    HeapKind            m_kind;
+    DWORD                m_Options;
 
     LoaderHeapFreeBlock *m_pFirstFreeBlock;
 
@@ -276,7 +263,6 @@ public:
 
 public:
     BOOL                m_fExplicitControl;  // Am I a LoaderHeap or an ExplicitControlLoaderHeap?
-    void                (*m_codePageGenerator)(BYTE* pageBase, BYTE* pageBaseRX);
 
 #ifdef DACCESS_COMPILE
 public:
@@ -297,9 +283,7 @@ protected:
                        const BYTE* dwReservedRegionAddress,
                        SIZE_T dwReservedRegionSize,
                        RangeList *pRangeList = NULL,
-                       HeapKind kind = HeapKind::Data,
-                       void (*codePageGenerator)(BYTE* pageBase, BYTE* pageBaseRX) = NULL,
-                       DWORD dwGranularity = 1);
+                       BOOL fMakeExecutable = FALSE);
 
     ~UnlockedLoaderHeap();
 #endif
@@ -416,7 +400,6 @@ public:
     }
 
     BOOL IsExecutable();
-    BOOL IsInterleaved();
 
 public:
 #ifdef _DEBUG
@@ -460,18 +443,14 @@ public:
     LoaderHeap(DWORD dwReserveBlockSize,
                DWORD dwCommitBlockSize,
                RangeList *pRangeList = NULL,
-               UnlockedLoaderHeap::HeapKind kind = UnlockedLoaderHeap::HeapKind::Data,
-               BOOL fUnlocked = FALSE,
-               void (*codePageGenerator)(BYTE* pageBase, BYTE* pageBaseRX) = NULL,
-               DWORD dwGranularity = 1
+               BOOL fMakeExecutable = FALSE,
+               BOOL fUnlocked = FALSE
                )
       : UnlockedLoaderHeap(dwReserveBlockSize,
                            dwCommitBlockSize,
                            NULL, 0,
                            pRangeList,
-                           kind,
-                           codePageGenerator,
-                           dwGranularity),
+                           fMakeExecutable),
         m_CriticalSection(fUnlocked ? NULL : CreateLoaderHeapLock())
     {
         WRAPPER_NO_CONTRACT;
@@ -484,18 +463,15 @@ public:
                const BYTE* dwReservedRegionAddress,
                SIZE_T dwReservedRegionSize,
                RangeList *pRangeList = NULL,
-               UnlockedLoaderHeap::HeapKind kind = UnlockedLoaderHeap::HeapKind::Data,
-               BOOL fUnlocked = FALSE,
-               void (*codePageGenerator)(BYTE* pageBase, BYTE* pageBaseRX) = NULL,
-               DWORD dwGranularity = 1
+               BOOL fMakeExecutable = FALSE,
+               BOOL fUnlocked = FALSE
                )
       : UnlockedLoaderHeap(dwReserveBlockSize,
                            dwCommitBlockSize,
                            dwReservedRegionAddress,
                            dwReservedRegionSize,
                            pRangeList,
-                           kind,
-                           codePageGenerator, dwGranularity),
+                           fMakeExecutable),
         m_CriticalSection(fUnlocked ? NULL : CreateLoaderHeapLock())
     {
         WRAPPER_NO_CONTRACT;
@@ -800,7 +776,7 @@ public:
                )
       : UnlockedLoaderHeap(0, 0, NULL, 0,
                            pRangeList,
-                           fMakeExecutable ? UnlockedLoaderHeap::HeapKind::Executable : UnlockedLoaderHeap::HeapKind::Data)
+                           fMakeExecutable)
     {
         WRAPPER_NO_CONTRACT;
         m_fExplicitControl = TRUE;

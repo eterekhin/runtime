@@ -399,28 +399,6 @@ class PrecodeStubManager : public StubManager
     ~PrecodeStubManager() {WRAPPER_NO_CONTRACT;}
 #endif
 
-  protected:
-    LockedRangeList m_stubPrecodeRangeList;
-    LockedRangeList m_fixupPrecodeRangeList;
-
-  public:
-    // Get dac-ized pointer to rangelist.
-    PTR_RangeList GetStubPrecodeRangeList()
-    {
-        SUPPORTS_DAC;
-
-        TADDR addr = PTR_HOST_MEMBER_TADDR(PrecodeStubManager, this, m_stubPrecodeRangeList);
-        return PTR_RangeList(addr);
-    }
-
-    PTR_RangeList GetFixupPrecodeRangeList()
-    {
-        SUPPORTS_DAC;
-
-        TADDR addr = PTR_HOST_MEMBER_TADDR(PrecodeStubManager, this, m_fixupPrecodeRangeList);
-        return PTR_RangeList(addr);
-    }
-
   public:
     virtual BOOL CheckIsStub_Internal(PCODE stubStartAddress);
 
@@ -612,6 +590,8 @@ class RangeSectionStubManager : public StubManager
 #endif
 
     static StubCodeBlockKind GetStubKind(PCODE stubStartAddress);
+
+    static PCODE GetMethodThunkTarget(PCODE stubStartAddress);
 
   public:
 #ifdef _DEBUG

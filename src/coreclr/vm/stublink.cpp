@@ -2168,7 +2168,7 @@ Stub* Stub::NewStub(PTR_VOID pCode, DWORD flags)
     _ASSERTE((stubPayloadOffset % CODE_SIZE_ALIGN) == 0);
     Stub* pStubRX = (Stub*)(pBlock + stubPayloadOffset);
     Stub* pStubRW;
-    ExecutableWriterHolderNoLog<Stub> stubWriterHolder;
+    ExecutableWriterHolder<Stub> stubWriterHolder;
 
     if (pHeap == NULL)
     {
@@ -2176,7 +2176,7 @@ Stub* Stub::NewStub(PTR_VOID pCode, DWORD flags)
     }
     else
     {
-        stubWriterHolder.AssignExecutableWriterHolder(pStubRX, sizeof(Stub));
+        stubWriterHolder = ExecutableWriterHolder<Stub>(pStubRX, sizeof(Stub));
         pStubRW = stubWriterHolder.GetRW();
     }
     pStubRW->SetupStub(

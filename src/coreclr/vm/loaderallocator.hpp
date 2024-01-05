@@ -160,8 +160,6 @@ protected:
     BYTE                m_HighFreqHeapInstance[sizeof(LoaderHeap)];
     BYTE                m_StubHeapInstance[sizeof(LoaderHeap)];
     BYTE                m_PrecodeHeapInstance[sizeof(CodeFragmentHeap)];
-    BYTE                m_FixupPrecodeHeapInstance[sizeof(LoaderHeap)];
-    BYTE                m_NewStubPrecodeHeapInstance[sizeof(LoaderHeap)];
     PTR_LoaderHeap      m_pLowFrequencyHeap;
     PTR_LoaderHeap      m_pHighFrequencyHeap;
     PTR_LoaderHeap      m_pStubHeap; // stubs for PInvoke, remoting, etc
@@ -170,8 +168,6 @@ protected:
 #ifdef FEATURE_READYTORUN
     PTR_CodeFragmentHeap m_pDynamicHelpersHeap;
 #endif
-    PTR_LoaderHeap      m_pFixupPrecodeHeap;
-    PTR_LoaderHeap      m_pNewStubPrecodeHeap;
     //****************************************************************************************
     OBJECTHANDLE        m_hLoaderAllocatorObjectHandle;
     FuncPtrStubs *      m_pFuncPtrStubs; // for GetMultiCallableAddrOfCode()
@@ -447,24 +443,12 @@ public:
         return m_pPrecodeHeap;
     }
 
-    PTR_LoaderHeap GetNewStubPrecodeHeap()
-    {
-        LIMITED_METHOD_CONTRACT;
-        return m_pNewStubPrecodeHeap;
-    }
-
     // The executable heap is intended to only be used by the global loader allocator.
     // It refers to executable memory that is not associated with a rangelist.
     PTR_LoaderHeap GetExecutableHeap()
     {
         LIMITED_METHOD_CONTRACT;
         return m_pExecutableHeap;
-    }
-
-    PTR_LoaderHeap GetFixupPrecodeHeap()
-    {
-        LIMITED_METHOD_CONTRACT;
-        return m_pFixupPrecodeHeap;
     }
 
     PTR_CodeFragmentHeap GetDynamicHelpersHeap();

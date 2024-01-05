@@ -614,6 +614,7 @@ typedef struct _DacGlobals
 #endif // TARGET_ARM
 
     ULONG fn__ThePreStubPatchLabel;
+    ULONG fn__PrecodeFixupThunk;
 #ifdef FEATURE_COMINTEROP
     ULONG fn__Unknown_AddRef;
     ULONG fn__Unknown_AddRefSpecial;

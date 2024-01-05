@@ -1420,13 +1420,6 @@ private:
     static unsigned m_LCG_JumpStubBlockFullCount;
 
 public:
-
-    static void DumpExecutionManagerUsage()
-    {
-        fprintf(stderr, "JumpStub usage count:\n");
-        fprintf(stderr, "Normal: %u, LCG: %u\n", m_normal_JumpStubLookup, m_LCG_JumpStubLookup);
-    }
-
     struct JumpStubCache
     {
         JumpStubCache()

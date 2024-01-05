@@ -283,8 +283,8 @@ public:
     {
         CONTRACTL
         {
-            NOTHROW;
-            GC_NOTRIGGER;
+            THROWS;
+            GC_TRIGGERS;
             MODE_ANY;
         }
         CONTRACTL_END
@@ -2722,7 +2722,7 @@ class NDirectImportThunkGlue
     PVOID m_dummy; // Dummy field to make the alignment right
 
 public:
-    LPVOID GetEntryPoint()
+    LPVOID GetEntrypoint()
     {
         LIMITED_METHOD_CONTRACT;
         return NULL;

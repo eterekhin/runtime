@@ -2674,6 +2674,7 @@ void Compiler::compInitOptions(JitFlags* jitFlags)
     lvaEnregEHVars       = (compEnregLocals() && JitConfig.EnableEHWriteThru());
     lvaEnregMultiRegVars = (compEnregLocals() && JitConfig.EnableMultiRegLocals());
 
+    opts.jitFlags->Clear((JitFlags::JitFlag)17);
     if (compIsForImportOnly())
     {
         return;

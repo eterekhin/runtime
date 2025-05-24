@@ -848,6 +848,12 @@ void Lowering::LowerBlockStore(GenTreeBlk* blkNode)
                 // temporary register(s) used for copying.
                 doCpObj                  = false;
                 blkNode->gtBlkOpGcUnsafe = true;
+
+                if (comp->opts.compDbgCode)
+                {
+                    GenTree* noOp = new (comp, GT_NO_OP) GenTree(GT_NO_OP, TYP_VOID);
+                    BlockRange().InsertBefore(blkNode, noOp);
+                }
             }
         }
 

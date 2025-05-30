@@ -486,18 +486,6 @@ int SequencePoints::MapSortILMap::Compare(DebuggerILToNativeMap * first,
     {
         return 1;
     }
-    // call_instruction goes at the very very end of the table.
-    else if ((first->source & call_inst) == call_inst
-        && (second->source & call_inst) == call_inst)
-    {
-        return CompareInternal(first, second);
-    } else if ((first->source & call_inst) == call_inst)
-    {
-        return 1;
-    } else if ((second->source & call_inst) == call_inst)
-    {
-        return -1;
-    }
     //NO_MAPPING go last
     else if (first->ilOffset == (ULONG) ICorDebugInfo::NO_MAPPING &&
              second->ilOffset == (ULONG) ICorDebugInfo::NO_MAPPING)
@@ -523,6 +511,18 @@ int SequencePoints::MapSortILMap::Compare(DebuggerILToNativeMap * first,
         return 1;
     }
     else if (second->ilOffset == (ULONG) ICorDebugInfo::EPILOG)
+    {
+        return -1;
+    }
+    // call_instructions goes next-to-EPILOGs
+    else if ((first->source & call_inst) == call_inst
+        && (second->source & call_inst) == call_inst)
+    {
+        return CompareInternal(first, second);
+    } else if ((first->source & call_inst) == call_inst)
+    {
+        return 1;
+    } else if ((second->source & call_inst) == call_inst)
     {
         return -1;
     }

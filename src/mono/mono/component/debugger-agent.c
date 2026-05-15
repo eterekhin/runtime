@@ -1614,6 +1614,20 @@ static GHashTable *obj_to_objref;
 /* Protected by the dbg lock */
 static MonoGHashTable *suspended_objs;
 
+static GHashTable *saved_by_ref_fields_ids;
+
+static int saved_by_ref_fields_count = 0;
+
+static int insert_saved_by_ref_field_value(MonoObject *addr) {
+	int id = ++saved_by_ref_fields_count;
+	g_hash_table_insert(saved_by_ref_fields_ids, GINT_TO_POINTER(id), addr);
+	return id;
+}
+
+static MonoObject* get_saved_by_ref_field_value(int id) {
+	return g_hash_table_lookup(saved_by_ref_fields_ids, GINT_TO_POINTER(id));
+}
+
 static void
 mono_init_debugger_agent_common (MonoProfilerHandle *prof)
 {
@@ -1653,6 +1667,7 @@ mono_init_debugger_agent_for_wasm (int log_level_parm, MonoProfilerHandle *prof)
 
 	objrefs = g_hash_table_new_full (NULL, NULL, NULL, mono_debugger_free_objref);
 	obj_to_objref = g_hash_table_new (NULL, NULL);
+	saved_by_ref_fields_ids = g_hash_table_new (NULL, NULL);
 
 	log_level = log_level_parm;
 
@@ -1678,6 +1693,7 @@ objrefs_init (void)
 	objrefs = g_hash_table_new_full (NULL, NULL, NULL, mono_debugger_free_objref);
 	obj_to_objref = g_hash_table_new (NULL, NULL);
 	suspended_objs = mono_g_hash_table_new_type_internal ((GHashFunc)mono_object_hash_internal, NULL, MONO_HASH_KEY_GC, MONO_ROOT_SOURCE_DEBUGGER, NULL, "Debugger Suspended Object Table");
+	saved_by_ref_fields_ids = g_hash_table_new (NULL, NULL);
 }
 
 static void
@@ -5095,6 +5111,7 @@ buffer_add_value_full (Buffer *buf, MonoType *t, void *addr, MonoDomain *domain,
 	if (CHECK_ICORDBG (TRUE))
 		buffer_add_byte (buf, !!m_type_is_byref (t));
 
+	int by_ref_id = 0;
 	if (m_type_is_byref (t)) {
 		if (!(*(void**)addr)) {
 			/* This can happen with compiler generated locals */
@@ -5105,6 +5122,7 @@ buffer_add_value_full (Buffer *buf, MonoType *t, void *addr, MonoDomain *domain,
 			return;
 		}
 		g_assert (*(void**)addr);
+		by_ref_id = insert_saved_by_ref_field_value(addr);
 		addr = *(void**)addr;
 	}
 
@@ -5141,29 +5159,34 @@ buffer_add_value_full (Buffer *buf, MonoType *t, void *addr, MonoDomain *domain,
 	switch (t->type) {
 	case MONO_TYPE_VOID:
 		buffer_add_byte (buf, t->type);
+		buffer_add_int(buf, by_ref_id);
 		break;
 	case MONO_TYPE_BOOLEAN:
 	case MONO_TYPE_I1:
 	case MONO_TYPE_U1:
 		buffer_add_byte (buf, t->type);
+		buffer_add_int(buf, by_ref_id);
 		buffer_add_int (buf, *(gint8*)addr);
 		break;
 	case MONO_TYPE_CHAR:
 	case MONO_TYPE_I2:
 	case MONO_TYPE_U2:
 		buffer_add_byte (buf, t->type);
+		buffer_add_int(buf, by_ref_id);
 		buffer_add_int (buf, *(gint16*)addr);
 		break;
 	case MONO_TYPE_I4:
 	case MONO_TYPE_U4:
 	case MONO_TYPE_R4:
 		buffer_add_byte (buf, t->type);
+		buffer_add_int(buf, by_ref_id);
 		buffer_add_int (buf, *(gint32*)addr);
 		break;
 	case MONO_TYPE_I8:
 	case MONO_TYPE_U8:
 	case MONO_TYPE_R8:
 		buffer_add_byte (buf, t->type);
+		buffer_add_int(buf, by_ref_id);
 		buffer_add_long (buf, *(gint64*)addr);
 		break;
 	case MONO_TYPE_I:
@@ -5175,6 +5198,7 @@ buffer_add_value_full (Buffer *buf, MonoType *t, void *addr, MonoDomain *domain,
 		gssize val = *(gssize*)addr;
 
 		buffer_add_byte (buf, t->type);
+		buffer_add_int(buf, by_ref_id);
 		buffer_add_long (buf, val);
 		if (CHECK_PROTOCOL_VERSION(2, 46))
 			buffer_add_typeid (buf, domain, mono_class_from_mono_type_internal (t));
@@ -5190,6 +5214,7 @@ buffer_add_value_full (Buffer *buf, MonoType *t, void *addr, MonoDomain *domain,
 
 		if (!obj) {
 			buffer_add_byte (buf, VALUE_TYPE_ID_NULL);
+			buffer_add_int(buf, by_ref_id);
 			if (CHECK_PROTOCOL_VERSION (2, 59)) {
 				buffer_add_info_for_null_value(buf, t, domain);
 			}
@@ -5201,10 +5226,13 @@ buffer_add_value_full (Buffer *buf, MonoType *t, void *addr, MonoDomain *domain,
 				goto handle_vtype;
 			} else if (m_class_get_rank (obj->vtable->klass)) {
 				buffer_add_byte (buf, m_class_get_byval_arg (obj->vtable->klass)->type);
+				buffer_add_int(buf, by_ref_id);
 			} else if (m_class_get_byval_arg (obj->vtable->klass)->type == MONO_TYPE_GENERICINST) {
 				buffer_add_byte (buf, MONO_TYPE_CLASS);
+				buffer_add_int(buf, by_ref_id);
 			} else {
 				buffer_add_byte (buf, m_class_get_byval_arg (obj->vtable->klass)->type);
+				buffer_add_int(buf, by_ref_id);
 			}
 			buffer_add_objid (buf, obj);
 			if (CHECK_ICORDBG (TRUE))
@@ -5244,6 +5272,7 @@ buffer_add_value_full (Buffer *buf, MonoType *t, void *addr, MonoDomain *domain,
 		}
 
 		buffer_add_byte (buf, MONO_TYPE_VALUETYPE);
+		buffer_add_int(buf, by_ref_id);
 		buffer_add_byte (buf, !!m_class_is_enumtype (klass));
 
 		if (CHECK_PROTOCOL_VERSION(2, 61))
@@ -5591,8 +5620,11 @@ end:
 static int
 decode_value_compute_size (MonoType *t, int type, MonoDomain *domain, guint8 *buf, guint8 **endbuf, guint8 *limit, gboolean from_by_ref_value_type)
 {
-	if (type == 0)
-		type = decode_byte (buf, &buf, limit);
+	if (type == 0) {
+		type = decode_byte(buf, &buf, limit);
+		decode_int(buf, &buf, limit); // ignore by_ref_id
+	}
+
 	int ret = 0;
 	if (type != t->type && !MONO_TYPE_IS_REFERENCE (t) &&
 		!(t->type == MONO_TYPE_I && type == MONO_TYPE_VALUETYPE) &&
@@ -5712,7 +5744,25 @@ decode_value_internal (MonoType *t, int type, MonoDomain *domain, guint8 *addr, 
 {
 	ErrorCode err;
 
-	if (m_type_is_byref (t) && extra_space != NULL && *extra_space != NULL) {
+	int by_ref_id = decode_int (buf, &buf, limit); // unused
+	if (by_ref_id) {
+		MonoObject* by_ref_obj = get_saved_by_ref_field_value(by_ref_id);
+		*(guint8**)addr=*(guint8**)by_ref_obj;
+		addr = *(guint8**)by_ref_obj;
+	}
+
+	BOOL is_by_ref_null = from_by_ref_value_type && type == VALUE_TYPE_ID_NULL;
+	if (is_by_ref_null) {
+		if (CHECK_PROTOCOL_VERSION(2, 59)) {
+			decode_byte(buf, &buf, limit);
+			decode_int(buf, &buf, limit); //not used
+		}
+		*(MonoObject **) addr = NULL;
+		*endbuf = buf;
+		return ERR_NONE;
+	}
+
+	if (!by_ref_id && m_type_is_byref (t) && extra_space != NULL && *extra_space != NULL) {
 		*(guint8**)addr = *extra_space; //assign the extra_space allocated for byref fields to the addr
 		guint8 *buf_int = buf;
 		addr = *(guint8**)addr; //dereference the pointer as it's a byref field
@@ -5729,7 +5779,8 @@ decode_value_internal (MonoType *t, int type, MonoDomain *domain, guint8 *addr, 
 		!(t->type == MONO_TYPE_GENERICINST && type == MONO_TYPE_VALUETYPE) &&
 		!(t->type == MONO_TYPE_VALUETYPE && type == MONO_TYPE_OBJECT) &&
 		!(t->type == MONO_TYPE_VALUETYPE && type == MONO_TYPE_SZARRAY) &&
-		!(t->type == MONO_TYPE_VALUETYPE && type == MONO_TYPE_ARRAY)) {
+		!(t->type == MONO_TYPE_VALUETYPE && type == MONO_TYPE_ARRAY) &&
+		!is_by_ref_null) {
 		char *name = mono_type_full_name (t);
 		PRINT_DEBUG_MSG (1, "[%p] Expected value of type %s, got 0x%0x.\n", (gpointer) (gsize) mono_native_thread_id_get (), name, type);
 		g_free (name);
@@ -6411,6 +6462,11 @@ mono_do_invoke_method (DebuggerTlsData *tls, Buffer *buf, InvokeData *invoke, gu
 			int type = decode_byte (p, &tmp_p, end);
 			if (type == VALUE_TYPE_ID_NULL) {
 				memset (this_buf, 0, mono_class_instance_size (m->klass));
+				if (CHECK_PROTOCOL_VERSION (2, 59)) {
+					decode_byte(tmp_p, &tmp_p, end);
+					decode_int(tmp_p, &tmp_p, end);
+				}
+
 				p = tmp_p;
 			} else {
 				err = decode_value (m_class_get_byval_arg (m->klass), domain, this_buf, p, &p, end, FALSE, &extra_space, FALSE);
